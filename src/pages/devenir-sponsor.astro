@@ -1,0 +1,157 @@
+---
+import Base from '../layouts/Base.astro';
+import FormulaireContact from '../components/FormulaireContact.astro';
+import Icon from '../components/Icon.astro';
+import site from '../site.config.js';
+import { url } from '../lib/url.js';
+
+const s = site.sponsors;
+const iconesAvantages = ['car', 'megaphone', 'leaf', 'graduation'];
+// Au moins 3 cases dans « Ils nous soutiennent » : les vides invitent à nous rejoindre.
+const casesVides = Math.max(0, 3 - s.liste.length);
+---
+<Base titre={s.titre} description="Devenez sponsor de l'équipage Eure4trophy au 4L Trophy 2027 : votre logo sur notre Renault 4L, de la visibilité sur nos réseaux et une image engagée auprès d'étudiants ingénieurs d'EURECOM.">
+  <header class="entete-page">
+    <div class="conteneur">
+      <p class="surtitre">Entreprises & partenaires</p>
+      <h1>{s.titre}</h1>
+      <p class="chapo">{s.intro}</p>
+      <div class="boutons">
+        <a class="bouton" href="#contact">Nous contacter <Icon name="arrow" /></a>
+        <a class="bouton bouton--clair" href={url(site.projet.dossierFichier)} download>
+          <Icon name="download" /> Dossier de sponsoring
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Avantages -->
+  <section class="section section--serree" aria-labelledby="titre-avantages">
+    <div class="conteneur">
+      <h2 id="titre-avantages">{s.avantagesTitre}</h2>
+      <div class="grille grille--4 avantages">
+        {s.avantages.map((a, i) => (
+          <article class="carte">
+            <div class="icone"><Icon name={iconesAvantages[i % iconesAvantages.length]} /></div>
+            <h3>{a.titre}</h3>
+            <p>{a.texte}</p>
+          </article>
+        ))}
+      </div>
+      <p class="note-fiscale">{s.noteFiscale}</p>
+    </div>
+  </section>
+
+  <!-- Formules -->
+  <section class="section section--bandes sombre" aria-labelledby="titre-formules">
+    <div class="bandes" aria-hidden="true"></div>
+    <div class="conteneur">
+      <h2 id="titre-formules">{s.formulesTitre}</h2>
+      <p class="chapo">{s.formulesIntro}</p>
+      <div class="grille grille--4 formules">
+        {s.formules.map((f) => (
+          <article class:list={['carte', 'formule', { 'formule--vedette': f.miseEnAvant }]}>
+            {f.miseEnAvant && <p class="formule__badge">Meilleur rapport visibilité / prix</p>}
+            <h3>{f.nom}</h3>
+            <p class="formule__prix">
+              {/* La police des titres n'a pas le caractère « ² » : on le remplace par un exposant */}
+              {f.prix.split('²').map((morceau, i) => (i > 0 ? <><sup>2</sup>{morceau}</> : morceau))}
+            </p>
+            <p class="formule__zone"><strong>Emplacement :</strong> {f.zone}</p>
+            <p class="formule__places">{f.places}</p>
+            <ul class="formule__inclus">
+              {f.inclus.map((item) => (
+                <li><Icon name="check" /> {item}</li>
+              ))}
+            </ul>
+            <a class="bouton" href={`?formule=${f.id}#contact`} data-formule={f.id}>
+              Choisir<span class="sr-only"> la formule {f.nom}</span>
+            </a>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="section" id="contact" aria-labelledby="titre-contact">
+    <div class="conteneur contact">
+      <div>
+        <p class="surtitre">Parlons-en</p>
+        <h2 id="titre-contact">{s.formulaireTitre}</h2>
+        <p>{s.formulaireIntro}</p>
+        <p><a class="contact__email" href={`mailto:${site.email}`}><Icon name="mail" /> {site.email}</a></p>
+      </div>
+      <FormulaireContact />
+    </div>
+  </section>
+
+  <!-- Ils nous soutiennent -->
+  <section class="section section--serree" aria-labelledby="titre-soutiens">
+    <div class="conteneur">
+      <h2 id="titre-soutiens">{s.soutiensTitre}</h2>
+      <ul class="logos">
+        {s.liste.map((sp) => (
+          <li class="logos__case">
+            {sp.lien ? (
+              <a href={sp.lien} target="_blank" rel="noopener">
+                <img src={url(sp.logo)} alt={sp.nom} loading="lazy" />
+              </a>
+            ) : (
+              <img src={url(sp.logo)} alt={sp.nom} loading="lazy" />
+            )}
+          </li>
+        ))}
+        {Array.from({ length: casesVides }).map(() => (
+          <li class="logos__case logos__case--vide">
+            <a href="#contact">{s.soutiensVide}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .avantages { margin-top: 32px; }
+  .note-fiscale { margin-top: 28px; font-size: 0.95rem; max-width: 75ch; }
+
+  .formules { margin-top: 32px; align-items: stretch; }
+  .formule { position: relative; }
+  .formule--vedette { background: #fff; }
+  .formule__badge {
+    position: absolute; top: -14px; right: 16px;
+    background: var(--orange); color: var(--nuit-encre);
+    border: 2px solid var(--nuit); border-radius: 999px;
+    padding: 2px 12px; font-size: 0.8rem; font-weight: 700; margin: 0;
+  }
+  .formule__prix { font-family: var(--f-titre); font-size: 1.8rem; color: var(--orange-texte); line-height: 1.1; margin-bottom: 0.4em; }
+  .formule__zone { margin-bottom: 0.3em; }
+  .formule__places { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+  .formule__inclus { list-style: none; padding: 0; margin: 0 0 20px; display: grid; gap: 8px; }
+  .formule__inclus li { display: flex; gap: 8px; align-items: flex-start; }
+  .formule__inclus :global(svg) { flex: none; width: 20px; height: 20px; color: var(--orange-texte); margin-top: 3px; }
+  .formule .bouton { margin-top: auto; }
+  .sombre .formule .bouton { border-color: var(--nuit); box-shadow: 3px 3px 0 var(--nuit); }
+
+  .contact { display: grid; gap: 32px; }
+  @media (min-width: 960px) { .contact { grid-template-columns: 0.8fr 1.2fr; gap: 56px; align-items: start; } }
+  .contact__email { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.1rem; overflow-wrap: anywhere; }
+
+  .logos {
+    list-style: none; margin: 28px 0 0; padding: 0;
+    display: grid; gap: 16px; grid-template-columns: repeat(2, 1fr);
+  }
+  @media (min-width: 700px) { .logos { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 1000px) { .logos { grid-template-columns: repeat(4, 1fr); } }
+  .logos__case {
+    aspect-ratio: 3 / 2;
+    display: grid; place-items: center;
+    background: #fff; border: 2px solid var(--nuit); border-radius: var(--rayon);
+    padding: 16px;
+  }
+  .logos__case img { max-height: 100%; width: auto; object-fit: contain; }
+  .logos__case a { display: grid; place-items: center; width: 100%; height: 100%; }
+  .logos__case--vide { background: transparent; border-style: dashed; }
+  .logos__case--vide a { font-weight: 700; text-align: center; }
+</style>

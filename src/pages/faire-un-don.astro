@@ -1,0 +1,131 @@
+---
+import Base from '../layouts/Base.astro';
+import BoutonLien from '../components/BoutonLien.astro';
+import Progression from '../components/Progression.astro';
+import Icon from '../components/Icon.astro';
+import site from '../site.config.js';
+import { url, euros } from '../lib/url.js';
+
+const d = site.dons;
+const maxBudget = Math.max(...d.budget.map((b) => b.montant));
+const iconesNature = ['wrench', 'book', 'ball'];
+---
+<Base titre={d.titre} description="Soutenez l'équipage Eure4trophy au 4L Trophy 2027 : faites un don en ligne via nos cagnottes, ou un don en nature (pièces auto, fournitures scolaires, matériel sportif).">
+  <header class="entete-page">
+    <div class="conteneur">
+      <p class="surtitre">Soutenir l'équipage</p>
+      <h1>{d.titre}</h1>
+      <p class="chapo">{d.intro}</p>
+    </div>
+  </header>
+
+  <!-- Cagnottes -->
+  <section class="section section--serree" aria-labelledby="titre-cagnottes">
+    <div class="conteneur">
+      <h2 id="titre-cagnottes" class="sr-only">Nos cagnottes en ligne</h2>
+      <div class="grille grille--2">
+        {d.cagnottes.map((c) => (
+          <article class="carte cagnotte">
+            <div class="icone"><Icon name="heart" /></div>
+            <h3>{c.nom}</h3>
+            <p>{c.description}</p>
+            <div class="cagnotte__action">
+              <BoutonLien lien={c.lien} texte={c.bouton} />
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {d.widgetHelloAsso && (
+        <div class="widget">
+          <h3>Donner directement ici avec HelloAsso</h3>
+          <iframe
+            src={d.widgetHelloAsso}
+            title="Formulaire de don HelloAsso"
+            loading="lazy"
+            style="width: 100%; height: 750px; border: none;"
+          ></iframe>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- Progression -->
+  <section class="section section--bandes sombre" aria-labelledby="titre-progression">
+    <div class="bandes" aria-hidden="true"></div>
+    <div class="conteneur">
+      <h2 id="titre-progression">Où en est-on ?</h2>
+      <Progression />
+    </div>
+  </section>
+
+  <!-- Utilisation de l'argent -->
+  <section class="section" aria-labelledby="titre-utilisation">
+    <div class="conteneur">
+      <p class="surtitre">Transparence</p>
+      <h2 id="titre-utilisation">{d.utilisationTitre}</h2>
+      <p class="chapo">{d.utilisationIntro}</p>
+      <ul class="budget">
+        {d.budget.map((b) => (
+          <li class="budget__ligne">
+            <div class="budget__entete">
+              <span class="budget__poste">{b.poste}</span>
+              <span class="budget__montant">{euros(b.montant)}</span>
+            </div>
+            <div class="budget__barre" aria-hidden="true">
+              <span style={`width: ${(b.montant / maxBudget) * 100}%`}></span>
+            </div>
+            <p class="budget__detail">{b.detail}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Dons en nature -->
+  <section class="section section--serree" aria-labelledby="titre-nature">
+    <div class="conteneur">
+      <p class="surtitre">Sans argent, c'est possible aussi</p>
+      <h2 id="titre-nature">{d.natureTitre}</h2>
+      <p class="chapo">{d.natureIntro}</p>
+      <div class="grille grille--3 nature">
+        {d.nature.map((n, i) => (
+          <article class="carte">
+            <div class="icone"><Icon name={iconesNature[i % iconesNature.length]} /></div>
+            <h3>{n.titre}</h3>
+            <p>{n.texte}</p>
+          </article>
+        ))}
+      </div>
+      <div class="nature__appel">
+        <p>{d.natureAppel}</p>
+        <div class="boutons">
+          <a class="bouton" href={url('devenir-sponsor/?formule=don-en-nature#contact')}>Nous contacter <Icon name="arrow" /></a>
+          <a class="bouton bouton--clair" href={`mailto:${site.email}?subject=Don%20en%20nature`}><Icon name="mail" /> {site.email}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .cagnotte__action { margin-top: auto; padding-top: 8px; }
+  .widget { margin-top: 48px; }
+  .widget iframe { border-radius: var(--rayon); background: #fff; }
+
+  .budget { list-style: none; margin: 32px 0 0; padding: 0; display: grid; gap: 24px; max-width: 760px; }
+  .budget__entete { display: flex; justify-content: space-between; gap: 16px; font-weight: 700; font-size: 1.1rem; }
+  .budget__montant { font-family: var(--f-titre); font-weight: 400; color: var(--orange-texte); white-space: nowrap; }
+  .budget__barre {
+    height: 16px; margin: 8px 0;
+    border: 2px solid var(--nuit); border-radius: 999px;
+    background: var(--sable-clair); overflow: hidden;
+  }
+  .budget__barre span { display: block; height: 100%; background: var(--nuit); }
+  .budget__ligne:nth-child(2n) .budget__barre span { background: var(--orange); }
+  .budget__detail { margin: 0; font-size: 0.95rem; }
+
+  .nature { margin-top: 32px; }
+  .nature__appel { margin-top: 40px; }
+  .nature__appel p { font-weight: 700; font-size: 1.15rem; }
+</style>

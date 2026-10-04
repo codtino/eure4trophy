@@ -1,0 +1,61 @@
+---
+import site from '../site.config.js';
+import Icon from './Icon.astro';
+import { url } from '../lib/url.js';
+---
+<footer class="pied sombre">
+  <div class="bandes" aria-hidden="true"></div>
+  <div class="conteneur pied__grille">
+    <div>
+      <p class="pied__marque">Eure<span>4</span>trophy</p>
+      <p>{site.slogan}</p>
+    </div>
+
+    <nav aria-label="Liens du pied de page">
+      <ul class="pied__liste">
+        <li><a href={url('notre-projet/')}>Notre projet</a></li>
+        <li><a href={url('faire-un-don/')}>Faire un don</a></li>
+        <li><a href={url('devenir-sponsor/')}>Devenir sponsor</a></li>
+        <li><a href={url(site.projet.dossierFichier)} download>Dossier de sponsoring (PDF)</a></li>
+      </ul>
+    </nav>
+
+    <ul class="pied__liste">
+      <li>
+        <a href={site.instagram.lien} rel="noopener" target="_blank">
+          <Icon name="instagram" /> @{site.instagram.pseudo}<span class="sr-only"> sur Instagram (nouvel onglet)</span>
+        </a>
+      </li>
+      <li>
+        <a href={`mailto:${site.email}`}><Icon name="mail" /> {site.email}</a>
+      </li>
+    </ul>
+  </div>
+  <div class="conteneur pied__mentions">
+    <p>{site.association}</p>
+    <p>{site.avertissement}</p>
+  </div>
+</footer>
+
+<style>
+  .pied { margin-top: 0; }
+  .pied__grille {
+    display: grid; gap: 32px;
+    padding-top: 48px; padding-bottom: 32px;
+  }
+  @media (min-width: 800px) { .pied__grille { grid-template-columns: 1.4fr 1fr 1fr; } }
+  .pied__marque { font-family: var(--f-titre); font-size: 1.6rem; margin-bottom: 0.3em; }
+  .pied__marque span { color: var(--orange-clair); }
+  .pied__liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; align-content: start; }
+  .pied__liste a {
+    display: inline-flex; align-items: center; gap: 8px;
+    min-height: 44px; font-weight: 500; overflow-wrap: anywhere;
+  }
+  .pied__liste :global(svg) { flex: none; width: 20px; height: 20px; }
+  .pied__mentions {
+    border-top: 1px solid rgba(243, 228, 196, 0.25);
+    padding-top: 20px; padding-bottom: 28px;
+    font-size: 0.9rem;
+  }
+  .pied__mentions p { margin: 0 0 0.3em; }
+</style>

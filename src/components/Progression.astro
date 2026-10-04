@@ -1,0 +1,82 @@
+---
+// Barre « Où en est-on ? » : collecte et objectif viennent de site.config.js.
+import site from '../site.config.js';
+import { euros } from '../lib/url.js';
+
+const { collecte, objectif, miseAJour } = site.financement;
+const pourcentage = objectif > 0 ? Math.min(100, Math.round((collecte / objectif) * 100)) : 0;
+const reste = Math.max(0, objectif - collecte);
+---
+<div class="progression">
+  <div class="progression__chiffres">
+    <p class="progression__collecte">
+      <span class="progression__montant">{euros(collecte)}</span>
+      <span>collectés sur {euros(objectif)}</span>
+    </p>
+    <p class="progression__pourcentage" aria-hidden="true">{pourcentage} %</p>
+  </div>
+
+  <div
+    class="progression__piste"
+    role="progressbar"
+    aria-label="Financement collecté"
+    aria-valuemin="0"
+    aria-valuemax={objectif}
+    aria-valuenow={collecte}
+    aria-valuetext={`${euros(collecte)} sur ${euros(objectif)}, soit ${pourcentage} %`}
+  >
+    <div class="progression__remplissage" style={`--p: ${pourcentage / 100}`}>
+      <svg class="progression__4l" viewBox="0 0 40 24" aria-hidden="true" focusable="false">
+        <path d="M3 17v-5l4-7h17l6 7h5c1.5 0 2 1 2 2v3z" fill="#F3E4C4" stroke="#1B2F4E" stroke-width="2" stroke-linejoin="round" />
+        <path d="M9 7h6v5H7zM17 7h6l4 5h-10z" fill="#1B2F4E" stroke="#1B2F4E" stroke-width="1.5" stroke-linejoin="round" />
+        <circle cx="10" cy="18" r="3.5" fill="#1B2F4E" />
+        <circle cx="30" cy="18" r="3.5" fill="#1B2F4E" />
+      </svg>
+    </div>
+  </div>
+
+  <p class="progression__info">
+    {collecte === 0
+      ? 'Le compteur démarre : soyez les premiers à nous faire avancer !'
+      : reste > 0
+        ? `Encore ${euros(reste)} pour atteindre la ligne de départ.`
+        : 'Objectif atteint, merci à toutes et à tous !'}
+    <span class="progression__date">Mis à jour le {miseAJour}.</span>
+  </p>
+</div>
+
+<style>
+  .progression__chiffres { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .progression__collecte { margin: 0 0 12px; font-size: 1.1rem; }
+  .progression__montant { display: block; font-family: var(--f-titre); font-size: clamp(2rem, 6vw, 3rem); line-height: 1; color: var(--orange-clair); }
+  .progression__pourcentage { font-family: var(--f-titre); font-size: 1.5rem; margin: 0 0 12px; }
+
+  .progression__piste {
+    position: relative;
+    height: 36px;
+    border: 2px solid var(--sable);
+    border-radius: 999px;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 22px, rgba(243, 228, 196, 0.35) 22px 34px) center / 100% 3px no-repeat,
+      rgba(243, 228, 196, 0.08);
+  }
+  .progression__remplissage {
+    position: relative;
+    height: 100%;
+    /* 40 px minimum : la 4L reste sur la ligne de départ à 0 % */
+    width: calc(40px + (100% - 40px) * var(--p));
+    border-radius: 999px;
+    background: var(--orange);
+    animation: remplir 1.6s cubic-bezier(.2, .8, .2, 1) both;
+  }
+  .progression__4l {
+    position: absolute; right: -4px; top: 50%;
+    width: 44px; height: 27px;
+    transform: translateY(-62%);
+    filter: drop-shadow(1px 1px 0 var(--sable));
+  }
+  @keyframes remplir { from { width: 40px; } }
+
+  .progression__info { margin: 18px 0 0; }
+  .progression__date { display: block; font-size: 0.9rem; opacity: 0.85; margin-top: 4px; }
+</style>

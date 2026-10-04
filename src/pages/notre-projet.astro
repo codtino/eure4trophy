@@ -1,0 +1,176 @@
+---
+import Base from '../layouts/Base.astro';
+import Photo from '../components/Photo.astro';
+import Icon from '../components/Icon.astro';
+import site from '../site.config.js';
+import { url } from '../lib/url.js';
+
+const p = site.projet;
+const pdf = url(p.dossierFichier);
+---
+<Base titre={p.titre} description="Le 4L Trophy, notre équipage d'EURECOM, notre 4L transmise d'année en année et notre action solidaire au Maroc. Téléchargez notre dossier de sponsoring.">
+  <header class="entete-page">
+    <div class="conteneur">
+      <p class="surtitre">Eure4trophy</p>
+      <h1>{p.titre}</h1>
+      <p class="chapo">{p.intro}</p>
+      <nav aria-label="Sommaire de la page" class="sommaire">
+        <ul>
+          <li><a href="#trophy">Le 4L Trophy</a></li>
+          <li><a href="#equipage">L'équipage</a></li>
+          <li><a href="#motivation">Notre motivation</a></li>
+          <li><a href="#solidaire">Le volet solidaire</a></li>
+          <li><a href="#calendrier">Calendrier</a></li>
+          <li><a href="#dossier">Dossier de sponsoring</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Le 4L Trophy -->
+  <section class="section section--serree" id="trophy" aria-labelledby="titre-trophy">
+    <div class="conteneur">
+      <div class="texte-long">
+        <h2 id="titre-trophy">{p.trophyTitre}</h2>
+        {p.trophy.map((t) => <p>{t}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <!-- L'équipage -->
+  <section class="section section--bandes sombre" id="equipage" aria-labelledby="titre-equipage">
+    <div class="bandes" aria-hidden="true"></div>
+    <div class="conteneur">
+      <h2 id="titre-equipage">{p.equipageTitre}</h2>
+      <p class="chapo">{p.equipageIntro}</p>
+      <div class="grille grille--2 membres">
+        {site.equipage.membres.map((m) => (
+          <article class="carte membre">
+            <Photo src={m.photo} alt={m.photoAlt} ratio="1 / 1" ronde class="membre__photo" />
+            <h3>{m.prenom} <span class="membre__surnom">« {m.surnom} »</span></h3>
+            <blockquote><p>{m.bio}</p></blockquote>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Motivation -->
+  <section class="section" id="motivation" aria-labelledby="titre-motivation">
+    <div class="conteneur deux-colonnes">
+      <div class="texte-long">
+        <h2 id="titre-motivation">{p.motivationTitre}</h2>
+        {p.motivation.map((t) => <p>{t}</p>)}
+      </div>
+      <Photo src={p.motivationPhoto} alt={p.motivationPhotoAlt} ratio="4 / 3" />
+    </div>
+  </section>
+
+  <!-- Volet solidaire -->
+  <section class="section section--serree" id="solidaire" aria-labelledby="titre-solidaire">
+    <div class="conteneur deux-colonnes deux-colonnes--inverse">
+      <div class="texte-long">
+        <h2 id="titre-solidaire">{p.solidaireTitre}</h2>
+        {p.solidaire.map((t) => <p>{t}</p>)}
+        <a class="bouton" href={url('faire-un-don/')}><Icon name="heart" /> Soutenir l'action</a>
+      </div>
+      <Photo src={p.solidairePhoto} alt={p.solidairePhotoAlt} ratio="4 / 3" />
+    </div>
+  </section>
+
+  <!-- Calendrier -->
+  <section class="section" id="calendrier" aria-labelledby="titre-calendrier">
+    <div class="conteneur">
+      <h2 id="titre-calendrier">{p.calendrierTitre}</h2>
+      <ol class="frise">
+        {p.calendrier.map((c) => (
+          <li class="frise__etape">
+            <h3>{c.mois}</h3>
+            <ul>
+              {c.etapes.map((e) => <li>{e}</li>)}
+            </ul>
+          </li>
+        ))}
+        <li class="frise__etape frise__arrivee">
+          <h3><Icon name="flag" /> Marrakech</h3>
+          <p>Ligne d'arrivée et remise des dons !</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Dossier de sponsoring -->
+  <section class="section section--bandes sombre" id="dossier" aria-labelledby="titre-dossier">
+    <div class="bandes" aria-hidden="true"></div>
+    <div class="conteneur">
+      <h2 id="titre-dossier">{p.dossierTitre}</h2>
+      <p class="chapo">{p.dossierIntro}</p>
+      <div class="boutons">
+        <a class="bouton" href={pdf} download>
+          <Icon name="download" /> Télécharger le dossier <span class="dossier__infos">({p.dossierInfos})</span>
+        </a>
+        <a class="bouton bouton--clair dossier__ouvrir" href={pdf} target="_blank" rel="noopener">
+          <Icon name="external" /> Ouvrir le dossier<span class="sr-only"> (nouvel onglet)</span>
+        </a>
+      </div>
+      <div class="dossier__visionneuse">
+        <iframe src={`${pdf}#view=FitH`} title="Dossier de sponsoring Eure4trophy (PDF)" loading="lazy"></iframe>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .sommaire ul { list-style: none; padding: 0; margin: 24px 0 0; display: flex; flex-wrap: wrap; gap: 10px; }
+  .sommaire a {
+    display: inline-block; padding: 8px 16px; min-height: 44px; line-height: 24px;
+    border: 2px solid var(--nuit); border-radius: 999px;
+    text-decoration: none; font-weight: 700; background: var(--sable-clair);
+  }
+  .sommaire a:hover { background: var(--orange); color: var(--nuit-encre); }
+
+  .membres { margin-top: 32px; }
+  .membre :global(.membre__photo) { width: 140px; margin-bottom: 16px; box-shadow: 3px 3px 0 var(--nuit); }
+  .membre h3 { font-size: 1.5rem; }
+  .membre__surnom { color: var(--orange-texte); font-size: 0.8em; }
+  .membre blockquote { margin: 0; font-style: italic; }
+  .membre blockquote p { margin: 0; }
+
+  .deux-colonnes { display: grid; gap: 32px; align-items: center; }
+  @media (min-width: 900px) {
+    .deux-colonnes { grid-template-columns: 1.2fr 1fr; gap: 56px; }
+    .deux-colonnes--inverse > :first-child { order: 2; }
+  }
+  .deux-colonnes .bouton { margin-top: 8px; }
+
+  .frise { list-style: none; margin: 32px 0 0; padding: 0; position: relative; }
+  .frise::before {
+    content: ''; position: absolute; left: 11px; top: 8px; bottom: 8px;
+    border-left: 4px dashed var(--nuit);
+  }
+  .frise__etape { position: relative; padding: 0 0 28px 48px; }
+  .frise__etape::before {
+    content: ''; position: absolute; left: 0; top: 4px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--orange); border: 3px solid var(--nuit);
+  }
+  .frise__etape h3 { margin-bottom: 0.3em; }
+  .frise__etape ul { margin: 0; padding-left: 1.1em; }
+  .frise__arrivee { padding-bottom: 0; }
+  .frise__arrivee::before { background: var(--nuit); }
+  .frise__arrivee h3 { display: flex; align-items: center; gap: 8px; color: var(--orange-texte); }
+  .frise__arrivee p { margin: 0; }
+
+  .dossier__infos { font-weight: 500; }
+  .dossier__visionneuse { display: none; }
+  /* Visionneuse intégrée seulement sur grand écran avec souris ;
+     sur mobile, les PDF intégrés s'affichent mal : on garde les boutons. */
+  @media (min-width: 900px) and (hover: hover) {
+    .dossier__visionneuse { display: block; margin-top: 32px; }
+    .dossier__visionneuse iframe {
+      width: 100%; height: 85vh; min-height: 600px;
+      border: 2px solid var(--sable); border-radius: var(--rayon); background: #fff;
+    }
+    .dossier__ouvrir { display: none; }
+  }
+</style>

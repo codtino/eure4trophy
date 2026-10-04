@@ -1,0 +1,120 @@
+---
+import site from '../site.config.js';
+import Icon from './Icon.astro';
+import { url } from '../lib/url.js';
+
+const liens = [
+  { href: '', label: 'Accueil' },
+  { href: 'notre-projet/', label: 'Notre projet' },
+  { href: 'devenir-sponsor/', label: 'Devenir sponsor' },
+  { href: 'faire-un-don/', label: 'Faire un don', cta: true },
+];
+const courant = Astro.url.pathname.replace(/\/?$/, '/');
+---
+<header class="entete">
+  <div class="conteneur entete__barre">
+    <a href={url('')} class="marque" aria-label={`${site.nom}, retour à l'accueil`}>
+      <img src={url('assets/logo-160.png')} alt="" width="48" height="48" />
+      <span>Eure<span class="marque__quatre">4</span>trophy</span>
+    </a>
+
+    <button class="burger" type="button" aria-expanded="false" aria-controls="menu-principal">
+      <Icon name="menu" class="burger__ouvrir" />
+      <Icon name="close" class="burger__fermer" />
+      <span class="sr-only">Menu</span>
+    </button>
+
+    <nav id="menu-principal" class="nav" aria-label="Navigation principale">
+      <ul>
+        {liens.map((l) => (
+          <li>
+            <a
+              href={url(l.href)}
+              class:list={['nav__lien', { 'bouton': l.cta }]}
+              aria-current={courant === url(l.href).replace(/\/?$/, '/') ? 'page' : undefined}
+            >
+              {l.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const bouton = document.querySelector<HTMLButtonElement>('.burger');
+  const nav = document.getElementById('menu-principal');
+  if (bouton && nav) {
+    const fermer = () => {
+      bouton.setAttribute('aria-expanded', 'false');
+      nav.classList.remove('nav--ouverte');
+    };
+    bouton.addEventListener('click', () => {
+      const ouvert = bouton.getAttribute('aria-expanded') === 'true';
+      bouton.setAttribute('aria-expanded', String(!ouvert));
+      nav.classList.toggle('nav--ouverte', !ouvert);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && bouton.getAttribute('aria-expanded') === 'true') {
+        fermer();
+        bouton.focus();
+      }
+    });
+  }
+</script>
+
+<style>
+  .entete {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--sable);
+    border-bottom: 2px solid var(--nuit);
+  }
+  .entete__barre {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    min-height: 72px;
+  }
+  .marque {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--f-titre); font-size: 1.35rem; text-decoration: none; color: var(--nuit);
+  }
+  .marque img { width: 48px; height: 48px; }
+  .marque__quatre { color: var(--orange-texte); }
+
+  .burger {
+    display: none;
+    width: 48px; height: 48px; border-radius: 12px;
+    border: 2px solid var(--nuit); background: var(--sable-clair); color: var(--nuit);
+    align-items: center; justify-content: center; cursor: pointer;
+  }
+  /* :global car les icônes viennent du composant Icon (styles scopés sinon ignorés) */
+  .burger :global(.burger__fermer) { display: none; }
+  .burger[aria-expanded="true"] :global(.burger__ouvrir) { display: none; }
+  .burger[aria-expanded="true"] :global(.burger__fermer) { display: block; }
+
+  .nav ul { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 6px; }
+  .nav__lien:not(.bouton) {
+    display: inline-block; padding: 10px 14px; border-radius: 999px;
+    font-weight: 700; text-decoration: none;
+  }
+  .nav__lien:not(.bouton):hover { background: var(--sable-fonce); color: var(--nuit); }
+  .nav__lien[aria-current="page"]:not(.bouton) { text-decoration: underline; text-decoration-color: var(--orange); text-decoration-thickness: 3px; text-underline-offset: 6px; }
+  .nav .bouton { margin-left: 8px; min-height: 44px; padding: 8px 20px; }
+
+  @media (max-width: 899px) {
+    :global(.js) .burger { display: inline-flex; }
+    :global(.js) .nav {
+      display: none;
+      position: absolute; left: 0; right: 0; top: 100%;
+      background: var(--sable);
+      border-bottom: 2px solid var(--nuit);
+      padding: 12px var(--gouttiere) 24px;
+    }
+    :global(.js) .nav.nav--ouverte { display: block; }
+    .nav ul { flex-direction: column; align-items: stretch; }
+    :global(.no-js) .nav ul { flex-direction: row; flex-wrap: wrap; padding-bottom: 12px; }
+    .nav__lien:not(.bouton) { display: block; padding: 14px 8px; font-size: 1.15rem; }
+    .nav .bouton { margin: 12px 0 0; width: 100%; }
+    :global(.no-js) .entete__barre { flex-wrap: wrap; }
+  }
+</style>

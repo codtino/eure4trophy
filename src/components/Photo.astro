@@ -1,0 +1,45 @@
+---
+// Affiche une photo de public/assets/photos/. Si le fichier n'existe pas encore,
+// un emplacement « Photo à venir » s'affiche à la place : il suffit de déposer
+// le fichier avec le bon nom pour qu'il apparaisse.
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import Icon from './Icon.astro';
+import { url } from '../lib/url.js';
+
+interface Props {
+  src: string;
+  alt: string;
+  ratio?: string;
+  ronde?: boolean;
+  eager?: boolean;
+  class?: string;
+}
+const { src, alt, ratio = '4 / 3', ronde = false, eager = false, class: className } = Astro.props;
+const existe = existsSync(join(process.cwd(), 'public', src));
+const nomFichier = src.split('/').pop();
+---
+{existe ? (
+  <figure class:list={['photo', { 'photo--ronde': ronde }, className]} style={`aspect-ratio: ${ratio}`}>
+    <img
+      src={url(src)}
+      alt={alt}
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+      fetchpriority={eager ? 'high' : undefined}
+    />
+  </figure>
+) : (
+  <figure
+    class:list={['photo', 'photo--vide', { 'photo--ronde': ronde }, className]}
+    style={`aspect-ratio: ${ratio}`}
+    role="img"
+    aria-label={alt}
+  >
+    <div aria-hidden="true">
+      <Icon name="camera" />
+      <div>Photo à venir</div>
+      {!ronde && <small>{nomFichier}</small>}
+    </div>
+  </figure>
+)}

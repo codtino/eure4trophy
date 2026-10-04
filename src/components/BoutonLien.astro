@@ -1,0 +1,17 @@
+---
+// Bouton vers un lien externe. Si le lien est vide dans la config,
+// affiche un bouton grisé « Bientôt disponible » (non cliquable).
+import Icon from './Icon.astro';
+
+interface Props { lien: string; texte: string; class?: string }
+const { lien, texte, class: className } = Astro.props;
+---
+{lien ? (
+  <a href={lien} class:list={['bouton', className]} target="_blank" rel="noopener">
+    {texte} <Icon name="external" /><span class="sr-only"> (nouvel onglet)</span>
+  </a>
+) : (
+  <button type="button" class:list={['bouton', className]} disabled aria-disabled="true">
+    Bientôt disponible
+  </button>
+)}

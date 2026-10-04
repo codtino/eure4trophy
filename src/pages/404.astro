@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import { url } from '../lib/url.js';
+---
+<Base titre="Page introuvable">
+  <section class="entete-page">
+    <div class="conteneur">
+      <p class="surtitre">Erreur 404</p>
+      <h1>Perdus dans le désert ?</h1>
+      <p class="chapo">Cette page n'existe pas. Sans GPS, ça arrive même aux meilleurs équipages !</p>
+      <a class="bouton" href={url('')}>Retour à l'accueil</a>
+    </div>
+  </section>
+</Base>

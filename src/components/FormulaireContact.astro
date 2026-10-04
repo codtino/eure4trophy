@@ -1,0 +1,153 @@
+---
+// Formulaire de contact sponsors, envoyé via Formspree (voir README).
+// Tant que formspreeId est vide dans la config, l'envoi ouvre la messagerie
+// du visiteur avec un email pré-rempli.
+import site from '../site.config.js';
+
+const { formspreeId, messageSucces, messageErreur } = site.formulaire;
+const action = formspreeId ? `https://formspree.io/f/${formspreeId}` : `mailto:${site.email}`;
+---
+<form
+  class="formulaire carte"
+  action={action}
+  method="POST"
+  enctype={formspreeId ? undefined : 'text/plain'}
+  data-formspree={formspreeId ? 'oui' : 'non'}
+  data-email={site.email}
+  data-succes={messageSucces}
+  data-erreur={messageErreur}
+>
+  <input type="hidden" name="_subject" value="Nouveau contact sponsor via le site Eure4trophy" />
+
+  <div class="champs">
+    <div class="champ">
+      <label for="f-nom">Nom et prénom <span aria-hidden="true">*</span></label>
+      <input id="f-nom" name="nom" type="text" autocomplete="name" required />
+    </div>
+    <div class="champ">
+      <label for="f-entreprise">Entreprise <span aria-hidden="true">*</span></label>
+      <input id="f-entreprise" name="entreprise" type="text" autocomplete="organization" required />
+    </div>
+    <div class="champ">
+      <label for="f-email">Email <span aria-hidden="true">*</span></label>
+      <input id="f-email" name="email" type="email" autocomplete="email" required />
+    </div>
+    <div class="champ">
+      <label for="f-tel">Téléphone <span class="optionnel">(optionnel)</span></label>
+      <input id="f-tel" name="telephone" type="tel" autocomplete="tel" />
+    </div>
+    <div class="champ champ--large">
+      <label for="f-formule">Formule qui vous intéresse <span aria-hidden="true">*</span></label>
+      <select id="f-formule" name="formule" required>
+        <option value="">Choisissez une option</option>
+        {site.sponsors.formules.map((f) => (
+          <option value={f.id}>{f.nom} ({f.prix})</option>
+        ))}
+        <option value="don-en-nature">Don en nature (matériel, pièces, fournitures)</option>
+        <option value="autre">Je ne sais pas encore / autre</option>
+      </select>
+    </div>
+    <div class="champ champ--large">
+      <label for="f-message">Message <span aria-hidden="true">*</span></label>
+      <textarea id="f-message" name="message" rows="6" required></textarea>
+    </div>
+
+    <!-- Piège anti-spam (honeypot) : invisible pour les humains, les robots le remplissent. -->
+    <div class="pot-de-miel" aria-hidden="true">
+      <label for="f-site">Ne pas remplir ce champ</label>
+      <input id="f-site" name="_gotcha" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+  </div>
+
+  <p class="mention"><span aria-hidden="true">*</span> Champs obligatoires. Vos informations servent uniquement à vous répondre.</p>
+  <button class="bouton" type="submit">Envoyer le message</button>
+  <p class="statut" role="status" aria-live="polite"></p>
+</form>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('.formulaire');
+  if (form) {
+    const statut = form.querySelector<HTMLElement>('.statut')!;
+    const select = form.querySelector<HTMLSelectElement>('#f-formule')!;
+    const envoyer = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+
+    // Pré-sélectionne la formule si on arrive depuis « Choisir cette formule » (?formule=...)
+    const choisie = new URLSearchParams(location.search).get('formule');
+    if (choisie && [...select.options].some((o) => o.value === choisie)) select.value = choisie;
+    document.querySelectorAll<HTMLAnchorElement>('[data-formule]').forEach((lien) => {
+      lien.addEventListener('click', () => { select.value = lien.dataset.formule ?? ''; });
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const donnees = new FormData(form);
+      if (donnees.get('_gotcha')) return; // robot détecté
+
+      // Sans Formspree configuré : on ouvre la messagerie avec un email pré-rempli.
+      if (form.dataset.formspree !== 'oui') {
+        const option = select.options[select.selectedIndex]?.text ?? '';
+        const corps = [
+          `Nom : ${donnees.get('nom')}`,
+          `Entreprise : ${donnees.get('entreprise')}`,
+          `Email : ${donnees.get('email')}`,
+          `Téléphone : ${donnees.get('telephone') || '-'}`,
+          `Formule : ${option}`,
+          '',
+          String(donnees.get('message')),
+        ].join('\n');
+        location.href = `mailto:${form.dataset.email}?subject=${encodeURIComponent('Partenariat Eure4trophy')}&body=${encodeURIComponent(corps)}`;
+        return;
+      }
+
+      envoyer.disabled = true;
+      statut.className = 'statut';
+      statut.textContent = 'Envoi en cours…';
+      try {
+        const reponse = await fetch(form.action, {
+          method: 'POST',
+          body: donnees,
+          headers: { Accept: 'application/json' },
+        });
+        if (!reponse.ok) throw new Error(String(reponse.status));
+        form.reset();
+        statut.className = 'statut statut--ok';
+        statut.textContent = form.dataset.succes ?? '';
+      } catch {
+        statut.className = 'statut statut--erreur';
+        statut.textContent = form.dataset.erreur ?? '';
+      } finally {
+        envoyer.disabled = false;
+      }
+    });
+  }
+</script>
+
+<style>
+  .champs { display: grid; gap: 18px; }
+  @media (min-width: 700px) {
+    .champs { grid-template-columns: 1fr 1fr; }
+    .champ--large { grid-column: 1 / -1; }
+  }
+  .champ { display: flex; flex-direction: column; gap: 6px; }
+  label { font-weight: 700; }
+  .optionnel { font-weight: 400; }
+  input, select, textarea {
+    font: inherit; color: var(--nuit);
+    width: 100%; min-height: 48px;
+    padding: 10px 14px;
+    background: #fff;
+    border: 2px solid var(--nuit);
+    border-radius: 10px;
+  }
+  textarea { resize: vertical; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid var(--orange); outline-offset: 1px;
+  }
+  .pot-de-miel { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .mention { font-size: 0.9rem; margin: 18px 0; }
+  .statut { margin: 16px 0 0; font-weight: 700; }
+  .statut:empty { display: none; }
+  .statut--ok { color: #1E6B3A; }
+  .statut--erreur { color: #A12A12; }
+  button[disabled] { opacity: 0.7; cursor: wait; }
+</style>
